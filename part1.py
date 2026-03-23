@@ -1,24 +1,8 @@
 from collections import deque
 
-filename = input("Enter the filename: ")
+
 alphabet = ['a', 'b']
-grammar = {}
 
-try:
-    with open(filename, 'r') as file:
-        rules = [line.strip() for line in file if line.strip()]
-        for rule in rules:
-            if '->' in rule:
-                lhs, rhs = rule.split('->')
-                lhs = lhs.strip()
-                productions = [p.strip() for p in rhs.split('|')]
-                grammar[lhs] = productions
-except FileNotFoundError:
-    print(f"Error: The file '{filename}' was not found.")
-    exit()
-
-
-start_symbol = list(grammar.keys())[0]
 
 def generate_npda(grammar, start):
     transitions_q0 = []
@@ -96,19 +80,40 @@ def run_simulation(grammar, start, input_str):
 
     return "reject"
 
-
-npda = generate_npda(grammar, start_symbol)
-print(f"\nNPDA:\n{npda}\n")
-
-with open("npda.txt", "w") as f:
-    f.write(npda)
-
+curr_file_name = None
 
 while True:
-    input_string = input("Enter a string to test or press 'q' to quit: ").strip()
-    if input_string.lower() == 'q': 
+    user_input = input(f"1 - Enter a file name (current file: {curr_file_name}) \n2 - Test a string \n3 - Quit\n")
+    if user_input == '1':
+        filename = input("Enter the filename: ")
+        grammar = {}
+
+        try:
+            with open(filename, 'r') as file:
+                rules = [line.strip() for line in file if line.strip()]
+                for rule in rules:
+                    if '->' in rule:
+                        lhs, rhs = rule.split('->')
+                        lhs = lhs.strip()
+                        productions = [p.strip() for p in rhs.split('|')]
+                        grammar[lhs] = productions
+            start_symbol = list(grammar.keys())[0]
+            npda = generate_npda(grammar, start_symbol)
+            curr_file_name = filename
+            print(f"\nNPDA:\n{npda}\n")
+            with open("npda.txt", "w") as f:
+                f.write(npda)
+        except FileNotFoundError:
+            print(f"Error: The file '{filename}' was not found.")
+            continue
+
+    elif user_input == '2':
+        input_string = input("Enter a string to test: \n").strip()
+        result = run_simulation(grammar, start_symbol, input_string)
+        print(f"Result: {result}\n")
+        continue
+
+    elif user_input == '3':
+        print("Exiting the program.")
         break
-    
-    result = run_simulation(grammar, start_symbol, input_string)
-    print(f"Result: {result}\n")
 
