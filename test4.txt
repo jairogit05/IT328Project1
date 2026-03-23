@@ -1,0 +1,3 @@
+S -> XaXaX
+X -> aXb|bXa|XX|empty
+
